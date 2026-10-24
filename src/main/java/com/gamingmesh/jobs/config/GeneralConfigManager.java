@@ -873,7 +873,8 @@ public class GeneralConfigManager {
 
         c.addComment("ExploitProtections.General.PlaceAndBreak.ProtectionOfOreGenerators", "When enabled blocks will keep protection after next generator cycle preventing quick money making aproach",
                 "Keep in mind that timers are based on block protection setup");
-        ignoreOreGenerators = c.get("ExploitProtections.General.PlaceAndBreak.ProtectionOfOreGenerators", true);
+        ignoreOreGenerators = c.get("ExploitProtections.General.PlaceAndBreak.ProtectionOfOreGenerators",
+                c.getC().getBoolean("ExploitProtections.General.PlaceAndBreak.IgnoreOreGenerators", true));
 
         c.addComment("ExploitProtections.General.PlaceAndBreak.KeepDataFor", "Only applies when old method is used", "For how long in days to keep block protection data in data base",
                 "This will clean block data which ones have -1 as cooldown value", "Data base cleanup will be performed on each server startup", "This cant be more then 14 days");
