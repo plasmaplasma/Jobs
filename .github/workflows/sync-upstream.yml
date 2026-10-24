@@ -1,0 +1,64 @@
+name: Sync from Zrips (verified)
+
+on:
+  schedule:
+    - cron: '21 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reijobs-upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'plasmaplasma/ReiJobs'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out complete master history
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Attempt ordinary upstream merge (never force)
+        id: merge
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote add zrips https://github.com/Zrips/Jobs.git
+          git fetch zrips master
+          if git merge-base --is-ancestor zrips/master HEAD; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            echo 'Already current with upstream.'
+            exit 0
+          fi
+          # Git will fail on a conflict. Exit without pushing any changes.
+          if ! git merge --no-ff --no-edit zrips/master; then
+            git merge --abort || true
+            echo 'Upstream merge conflict; manual port needed. Branch unchanged.' >&2
+            exit 1
+          fi
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 25
+        if: steps.merge.outputs.changed == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Verify build before updating fork
+        if: steps.merge.outputs.changed == 'true'
+        run: mvn --batch-mode --no-transfer-progress verify
+
+      - name: Push verified merge (no force)
+        if: steps.merge.outputs.changed == 'true'
+        run: git push origin HEAD:refs/heads/master
