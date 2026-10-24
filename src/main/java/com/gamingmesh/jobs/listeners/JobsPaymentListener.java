@@ -149,6 +149,14 @@ public final class JobsPaymentListener implements Listener {
             .build();
     private Cache<UUID, Long> cowMilkingTimer;
 
+    // Only used when mcMMO provides the optional bulk Tree Feller event.
+    // Both event paths can describe the same log; pay for that log once.
+    private static final Cache<String, Boolean> recentTreeFellerBlocks = CacheBuilder.newBuilder()
+            .expireAfterWrite(2, TimeUnit.SECONDS)
+            .maximumSize(20000)
+            .build();
+    private static volatile boolean bulkTreeFellerEventAvailable;
+
     public JobsPaymentListener(Jobs plugin) {
         this.plugin = plugin;
 
@@ -448,7 +456,41 @@ public final class JobsPaymentListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         final Block block = event.getBlock();
+        final Player player = event.getPlayer();
 
+        if (bulkTreeFellerEventAvailable) {
+            boolean treeFeller = event.getClass().getSimpleName().equals("TreeFellerBlockBreakEvent");
+            if (!treeFeller && JobsHook.getMcMMOManager() != null) {
+                Map<String, Long> abilities = JobsHook.getMcMMOManager().getMap().get(player.getUniqueId());
+                treeFeller = abilities != null && abilities.containsKey("tree_feller");
+            }
+            if (treeFeller && !rememberTreeFellerBlock(block, player))
+                return;
+        }
+
+        handleBlockBreak(block, player, plugin);
+    }
+
+    /** Called only for optional mcMMO events that report multiple broken blocks at once. */
+    public static void handleBulkTreeFellerBlock(Block block, Player player, Jobs plugin) {
+        if (block == null || player == null || block.getType().isAir())
+            return;
+        if (!rememberTreeFellerBlock(block, player))
+            return;
+        handleBlockBreak(block, player, plugin);
+    }
+
+    public static void enableBulkTreeFellerSupport() {
+        bulkTreeFellerEventAvailable = true;
+    }
+
+    private static boolean rememberTreeFellerBlock(Block block, Player player) {
+        String key = player.getUniqueId() + ":" + block.getWorld().getUID() + ":"
+                + block.getX() + ":" + block.getY() + ":" + block.getZ();
+        return recentTreeFellerBlocks.asMap().putIfAbsent(key, Boolean.TRUE) == null;
+    }
+
+    private static void handleBlockBreak(Block block, Player player, Jobs plugin) {
         if (!Jobs.getGCManager().canPerformActionInWorld(block.getWorld()))
             return;
 
@@ -456,8 +498,6 @@ public final class JobsPaymentListener implements Listener {
         if (JobsHook.BlockTracker.isEnabled() && Jobs.getGCManager().useBlockProtectionBlockTracker && JobsHook.getBlockTrackerManager().isTracked(block)) {
             return;
         }
-
-        Player player = event.getPlayer();
 
         // Remove block owner ships
         plugin.removeBlockOwnerShip(block);
