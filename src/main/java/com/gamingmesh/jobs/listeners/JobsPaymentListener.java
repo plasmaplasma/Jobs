@@ -135,6 +135,7 @@ import uk.antiperson.stackmob.entity.StackEntity;
 public final class JobsPaymentListener implements Listener {
 
     private final Jobs plugin;
+    private static volatile JobsPaymentListener activePaymentListener;
     private final String blockMetadata = "BlockOwner";
 
     private final Cache<UUID, Double> damageDealtByPlayers = CacheBuilder.newBuilder()
@@ -159,6 +160,7 @@ public final class JobsPaymentListener implements Listener {
 
     public JobsPaymentListener(Jobs plugin) {
         this.plugin = plugin;
+        activePaymentListener = this;
 
         if (Jobs.getGCManager().CowMilkingTimer > 0) {
             cowMilkingTimer = CacheBuilder.newBuilder()
@@ -468,16 +470,17 @@ public final class JobsPaymentListener implements Listener {
                 return;
         }
 
-        handleBlockBreak(block, player, plugin);
+        handleBlockBreak(block, player);
     }
 
     /** Called only for optional mcMMO events that report multiple broken blocks at once. */
     public static void handleBulkTreeFellerBlock(Block block, Player player, Jobs plugin) {
-        if (block == null || player == null || block.getType().isAir())
+        JobsPaymentListener listener = activePaymentListener;
+        if (listener == null || listener.plugin != plugin || block == null || player == null || block.getType().isAir())
             return;
         if (!rememberTreeFellerBlock(block, player))
             return;
-        handleBlockBreak(block, player, plugin);
+        listener.handleBlockBreak(block, player);
     }
 
     public static void enableBulkTreeFellerSupport() {
@@ -490,7 +493,7 @@ public final class JobsPaymentListener implements Listener {
         return recentTreeFellerBlocks.asMap().putIfAbsent(key, Boolean.TRUE) == null;
     }
 
-    private static void handleBlockBreak(Block block, Player player, Jobs plugin) {
+    private void handleBlockBreak(Block block, Player player) {
         if (!Jobs.getGCManager().canPerformActionInWorld(block.getWorld()))
             return;
 
