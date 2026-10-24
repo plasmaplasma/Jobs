@@ -145,7 +145,9 @@ public enum JobsHook {
 
             try {
                 Class.forName("com.gmail.nossr50.datatypes.skills.SuperAbilityType");
-                JavaPlugin.getPlugin(Jobs.class).getServer().getPluginManager().registerEvents(new McMMO2_X_listener(), JavaPlugin.getPlugin(Jobs.class));
+                McMMO2_X_listener listener = new McMMO2_X_listener();
+                JavaPlugin.getPlugin(Jobs.class).getServer().getPluginManager().registerEvents(listener, JavaPlugin.getPlugin(Jobs.class));
+                listener.registerBulkTreeFellerSupport(JavaPlugin.getPlugin(Jobs.class));
                 printListenerMessage(this, "2.x");
             } catch (ClassNotFoundException e) {
                 JavaPlugin.getPlugin(Jobs.class).getServer().getPluginManager().registerEvents(new McMMO1_X_listener(), JavaPlugin.getPlugin(Jobs.class));
