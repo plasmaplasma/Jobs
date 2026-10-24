@@ -1,4 +1,4 @@
-name: ReiJobs Build
+name: Jobs Build
 
 on:
   push:

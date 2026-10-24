@@ -9,12 +9,12 @@ permissions:
   contents: write
 
 concurrency:
-  group: reijobs-upstream-sync
+  group: jobs-upstream-sync
   cancel-in-progress: false
 
 jobs:
   sync:
-    if: github.repository == 'plasmaplasma/ReiJobs'
+    if: github.repository_owner == 'plasmaplasma'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
