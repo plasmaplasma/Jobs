@@ -39,7 +39,7 @@ Values below are newly selected **SefraMC base payouts in Embers**. They are not
 | Weaponsmith / CRAFT | Iron sword 3; diamond sword 6 |
 | Brewer / BREW | Nether wart 1.0; redstone 1.25; glowstone 1.25 |
 
-Other payouts and per-action XP are retained from existing job files. Hunter already supported Guardian/Squid; Elder Guardian and Glow Squid are explicitly added. A distinct Cook definition is provided in the Jobs fork. No paid-preset content is reproduced verbatim.
+Other payouts and per-action XP are retained from existing job files **except Guardian XP**, raised from 2 to 10 per kill per the owner-provided post. Hunter already supported Guardian/Squid; Elder Guardian and Glow Squid are explicitly added. A distinct Cook definition is provided in the Jobs fork. No paid-preset content is reproduced verbatim.
 
 ## Payout protections and operating limits
 
