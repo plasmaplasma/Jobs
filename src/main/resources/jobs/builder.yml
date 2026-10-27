@@ -5,13 +5,14 @@ Builder:
   - "Earns money for building structures."
   ChatColour: WHITE
   chat-display: full
-  max-level: 200
-  leveling-progression-equation: 10*(joblevel)+(joblevel*joblevel*4)
+  max-level: 9
+  vip-max-level: 99
+  leveling-progression-equation: (10*(joblevel)+(joblevel*(joblevel*1.3)*110))*(joblevel*0.03)
   income-progression-equation: baseincome+(baseincome*(joblevel-1)*0.01)-((baseincome+(baseincome*(joblevel-1)*0.01))
     * ((numjobs-1)*0.05))
   points-progression-equation: basepoints+(basepoints*(joblevel-1)*0.01)-((basepoints+(basepoints*(joblevel-1)*0.01))
     * ((numjobs-1)*0.05))
-  experience-progression-equation: baseexperience-(baseexperience*((numjobs-1) *0.01))
+  experience-progression-equation: baseexperience*0.46*(1-((numjobs-1)*0.01))
   rejoinCooldown: 10
   maxDailyQuests: 1
   Quests:
@@ -31,7 +32,7 @@ Builder:
     ItemStack: brick_stairs
   Place:
     stone:
-      income: 1.3
+      income: 0.04
       points: 1.3
       experience: 2
     andesite:
@@ -47,15 +48,15 @@ Builder:
       points: 1.3
       experience: 2
     cobblestone:
-      income: 0.7
+      income: 0.04
       points: 0.7
       experience: 2
     oak_planks:
-      income: 1.5
+      income: 0.09
       points: 1.5
       experience: 2
     spruce_planks:
-      income: 1.5
+      income: 0.09
       points: 1.5
       experience: 2
     birch_planks:
@@ -151,7 +152,7 @@ Builder:
       points: 0.8
       experience: 2
     bricks:
-      income: 1.5
+      income: 0.13
       points: 1.5
       experience: 2
     bookshelf:
@@ -415,7 +416,7 @@ Builder:
       points: 1.5
       experience: 2
     stone_bricks:
-      income: 1.5
+      income: 0.12
       points: 1.5
       experience: 2
     mossy_stone_bricks:
