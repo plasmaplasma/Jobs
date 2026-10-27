@@ -127,7 +127,7 @@ Hunter:
     GUARDIAN:
       income: 4
       points: 2
-      experience: 2.0
+      experience: 10
     SHULKER:
       income: 5.0
       points: 5
