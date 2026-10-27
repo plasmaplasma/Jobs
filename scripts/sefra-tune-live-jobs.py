@@ -63,10 +63,14 @@ def scalar_patch(source: str, edits: dict):
         if path in edits:
             if raw is None or not raw.strip() or raw.lstrip().startswith("#"):
                 raise ValueError(f"Expected scalar {path!r}")
-            value = yaml.safe_dump(edits[path], default_flow_style=True).strip()
-            if value.endswith("..."):
-                value = value[:-3].strip()
-            line = f"{indent}{name}: {value}\n"
+            # Preserve original quoting/formatting when the semantic value is
+            # already correct; this makes the migration exactly idempotent.
+            existing = yaml.safe_load(raw)
+            if existing != edits[path]:
+                value = yaml.safe_dump(edits[path], default_flow_style=True).strip()
+                if value.endswith("..."):
+                    value = value[:-3].strip()
+                line = f"{indent}{name}: {value}\n"
             found.add(path)
         elif raw is None or not raw.strip():
             stack.append((depth, name))
