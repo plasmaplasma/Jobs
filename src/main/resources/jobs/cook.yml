@@ -1,0 +1,43 @@
+# Authored for SefraMC. Does not bundle paid third-party configuration.
+# OPTIONAL custom Jobs Reborn profession, separate from SePathways.
+# Install by copying to plugins/Jobs/jobs/cook.yml and reloading/restarting Jobs.
+# Do not add this to SePathways/pathways; the latter already includes cook.yml.
+#
+# Cook is not a default job of the upstream Jobs fork. This deliberately uses
+# straightforward vanilla Craft/Smelt actions and modest amounts. Some server
+# versions may distinguish campfires from furnace/smoker Smelt events.
+# Confirm recorded wages/XP and anti-recraft/anti-exploit protections in game.
+Cook:
+  fullname: Cook
+  shortname: Co
+  FullDescription:
+    - 'Earns wages preparing meals and cooking ordinary food.'
+  ChatColour: GOLD
+  chat-display: full
+  max-level: 9
+  vip-max-level: 99
+  leveling-progression-equation: '(10*(joblevel)+(joblevel*(joblevel*1.3)*110))*(joblevel*0.03)'
+  income-progression-equation: 'baseincome+(baseincome*(joblevel-1)*0.01)-((baseincome+(baseincome*(joblevel-1)*0.01)) * ((numjobs-1)*0.05))'
+  points-progression-equation: 'basepoints+(basepoints*(joblevel-1)*0.01)-((basepoints+(basepoints*(joblevel-1)*0.01)) * ((numjobs-1)*0.05))'
+  experience-progression-equation: 'baseexperience*0.46*(1-((numjobs-1)*0.01))'
+  rejoinCooldown: 10
+  maxDailyQuests: 0
+  Gui:
+    ItemStack: cooked_beef
+  # Prepared food from cooking stations.
+  Smelt:
+    cooked_beef: {income: 0.18, points: 1.0, experience: 1.5}
+    cooked_porkchop: {income: 0.18, points: 1.0, experience: 1.5}
+    cooked_chicken: {income: 0.8, points: 0.8, experience: 1.2}
+    cooked_mutton: {income: 0.8, points: 0.8, experience: 1.2}
+    cooked_rabbit: {income: 1.1, points: 1.1, experience: 1.4}
+    cooked_cod: {income: 0.14, points: 0.8, experience: 1.1}
+    cooked_salmon: {income: 0.16, points: 1.0, experience: 1.5}
+    baked_potato: {income: 0.08, points: 0.5, experience: 0.7}
+    dried_kelp: {income: 0.1, points: 0.1, experience: 0.1}
+  # Player crafting food; rates intentionally small.
+  Craft:
+    bread: {income: 0.16, points: 0.25, experience: 0.5}
+    cookie: {income: 0.05, points: 0.05, experience: 0.08}
+    cake: {income: 0.7, points: 2.0, experience: 3.0}
+    pumpkin_pie: {income: 0.45, points: 0.6, experience: 0.9}
