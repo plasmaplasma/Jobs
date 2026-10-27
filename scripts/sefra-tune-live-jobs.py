@@ -141,6 +141,14 @@ def tune_job(original: str, template: str, job: str):
                                  re.I | re.M)
             section = compact.sub(lambda m: m.group(1) + str(values["income"]),
                                   section, count=1)
+            # The owner specifically requested higher Guardian XP in the Jobs
+            # balance post; this is the sole existing per-action EXP override.
+            if job == "Hunter" and action == "Kill" and str(key).upper() == "GUARDIAN":
+                xp = re.compile(r"(^    " + keypattern +
+                                r":\s*\n(?:      [^\n]*\n)*?      experience:\s*)"
+                                r"-?\d+(?:\.\d+)?", re.I | re.M)
+                section = xp.sub(lambda m: m.group(1) + str(values["experience"]),
+                                 section, count=1)
         revised = revised[:category.end()] + section + revised[stop:]
 
     # The only NEW gameplay actions: missing Elder Guardian and Glow Squid
