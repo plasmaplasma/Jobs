@@ -95,15 +95,23 @@ def tune_job(original: str, template: str, job: str):
     if found != set(edits):
         raise ValueError(f"{job}: missing progression config keys: {set(edits)-found}")
 
-    # Match existing activity blocks. Economic targets come from OUR fork,
-    # not from any purchased package at deployment time.
+    # Change paid actions only within their named Jobs action category.
+    # This prevents, for example, the Miner Break/stone price accidentally
+    # replacing TNTBreak/stone or another profession activity with the same key.
     for action in ACTION_KEYS:
         source_entries = selected.get(action)
         if not isinstance(source_entries, dict):
             continue
+        category = re.search(r"^  " + re.escape(action) + r":\s*$", revised, re.M)
+        if category is None:
+            continue
+        suffix = revised[category.end():]
+        following = re.search(r"^  [A-Za-z][\w-]*:\s*$", suffix, re.M)
+        stop = category.end() + (following.start() if following else len(suffix))
+        section = revised[category.end():stop]
+
         for key, values in source_entries.items():
             if key == "materials" and isinstance(values, list):
-                # Jobs supports compact "oak_log;income;points;xp" material lists.
                 for spec in values:
                     parts = str(spec).split(";")
                     if len(parts) < 4:
@@ -111,16 +119,25 @@ def tune_job(original: str, template: str, job: str):
                     material, amount = parts[0], parts[1]
                     pat = re.compile(r"(^\s*-\s*" + re.escape(material) +
                                      r";)-?\d+(?:\.\d+)?(;[^\n]+)", re.I | re.M)
-                    revised = pat.sub(lambda m: m.group(1) + str(amount) +
-                                      m.group(2), revised, count=1)
+                    section = pat.sub(lambda m: m.group(1) + str(amount) +
+                                      m.group(2), section, count=1)
                 continue
             if not isinstance(values, dict) or "income" not in values:
                 continue
-            block = re.compile(r"(^    " + re.escape(str(key)) +
+            keypattern = re.escape(str(key))
+            block = re.compile(r"(^    " + keypattern +
                                r":\s*\n      income:\s*)-?\d+(?:\.\d+)?",
                                re.I | re.M)
-            revised = block.sub(lambda m: m.group(1) + str(values["income"]),
-                                revised, count=1)
+            section = block.sub(lambda m: m.group(1) + str(values["income"]),
+                                section, count=1)
+            # Cook uses compact one-line entries like
+            # "cooked_beef: {income: 1.0, points: 1, experience: 1.5}".
+            compact = re.compile(r"(^    " + keypattern +
+                                 r":\s*\{\s*income:\s*)-?\d+(?:\.\d+)?",
+                                 re.I | re.M)
+            section = compact.sub(lambda m: m.group(1) + str(values["income"]),
+                                  section, count=1)
+        revised = revised[:category.end()] + section + revised[stop:]
 
     # The only NEW gameplay actions: missing Elder Guardian and Glow Squid
     # (the owner-provided info post explicitly called these out).
