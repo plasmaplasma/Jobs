@@ -27,6 +27,12 @@ for name in expected:
 hunter = yaml.safe_load((jobs / "hunter.yml").read_text())["Hunter"]["Kill"]
 assert {"GUARDIAN", "SQUID", "GLOW_SQUID", "ELDER_GUARDIAN"} <= set(hunter)
 assert hunter["ELDER_GUARDIAN"]["income"] > hunter["GUARDIAN"]["income"]
+assert hunter["GUARDIAN"]["experience"] == 10
+# Existing Guardian XP is the only targeted per-action experience edit.
+hunter_source = (jobs / "hunter.yml").read_text()
+old_guardian = hunter_source.replace("GUARDIAN:\n      income: 4\n      points: 2\n      experience: 10", "GUARDIAN:\n      income: 4\n      points: 2\n      experience: 2")
+assert old_guardian != hunter_source
+assert module.tune_job(old_guardian, hunter_source, "Hunter") == hunter_source
 
 # Sync must be idempotent, preserve TNTBreak, and never alter a quest/GUI.
 miner = (jobs / "miner.yml").read_text()
